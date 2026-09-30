@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#24160f">
+  <title>CoffeeControl</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div><div class="eyebrow">CONTROL COMPARTIT</div><h1>☕ CoffeeControl</h1></div>
+  <button id="resetBtn" class="ghost small">Reiniciar dades</button>
+</header>
+
+<main>
+<section id="dashboard" class="view active">
+  <div class="hero">
+    <div><span>Darrera compra</span><strong id="lastPurchase">—</strong></div>
+    <button class="primary" data-go="purchases">+ Nova compra</button>
+  </div>
+  <div class="cards">
+    <article><span>Membres actius</span><b id="activeCount">0</b></article>
+    <article><span>Kg comprats</span><b id="kgTotal">0</b></article>
+    <article><span>Despesa total</span><b id="spentTotal">0 €</b></article>
+    <article><span>Preu mitjà/kg</span><b id="avgKg">0 €</b></article><article class="balanceCard"><div class="balanceHead"><span>Saldo del grup</span><button id="addBalanceBtn" class="miniAdd" type="button">+ Afegir saldo</button></div><b id="groupBalance">0 €</b><small>Disponible per a la propera compra</small></article>
+  </div>
+  <div class="panel">
+    <div class="panelhead"><h2>Darrera compra</h2><button class="link" data-go="payments">Veure Bizums →</button></div>
+    <div id="lastSummary"></div>
+    <button id="shareSummary" class="secondary full shareBtn">↗ Compartir resum</button>
+  </div>
+  <div class="panel"><h2>Consum</h2><div id="consumption" class="muted">Afegeix més compres per calcular el ritme de consum.</div></div>
+</section>
+
+<section id="purchases" class="view">
+  <div class="sectionhead"><div><span>HISTÒRIC</span><h2>Compres</h2></div><button id="newPurchaseBtn" class="primary">+ Nova</button></div>
+  <div id="purchaseList"></div>
+</section>
+
+<section id="payments" class="view">
+  <div class="sectionhead"><div><span>CONTROL</span><h2>Bizums</h2></div><select id="purchaseSelect"></select></div>
+  <div class="paymentSummary" id="paymentSummary"></div>
+  <div id="paymentList" class="peopleList"></div>
+  <button id="copyPending" class="secondary full">Copiar pendents</button>
+</section>
+
+<section id="members" class="view">
+  <div class="sectionhead"><div><span>GRUP</span><h2>Membres</h2></div><button id="newMemberBtn" class="primary">+ Afegir</button></div>
+  <div id="memberList" class="peopleList"></div>
+  <div class="panel backupPanel">
+    <div class="panelhead"><div><span>CÒPIA DE SEGURETAT</span><h2>Dades de CoffeeControl</h2></div></div>
+    <p class="muted backupText">Exporta totes les compres, Bizums, membres i saldo en un fitxer. El pots guardar a iCloud Drive i importar-lo en un altre dispositiu.</p>
+    <div class="backupActions">
+      <button id="exportBackup" class="secondary">↓ Exportar còpia</button>
+      <button id="importBackup" class="ghost">↑ Importar còpia</button>
+      <input id="backupFile" type="file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="nav active" data-go="dashboard">⌂<span>Inici</span></button>
+  <button class="nav" data-go="purchases">▤<span>Compres</span></button>
+  <button class="nav" data-go="payments">€<span>Bizums</span></button>
+  <button class="nav" data-go="members">♟<span>Membres</span></button>
+</nav>
+
+<dialog id="purchaseDialog"><form id="purchaseForm" method="dialog">
+  <h3 id="purchaseDialogTitle">Nova compra</h3><input id="pEditId" type="hidden">
+  <label>Data<input id="pDate" type="date" required></label>
+  <label>Kg de cafè<input id="pKg" type="number" min=".1" step=".1" required></label>
+  <label>Import total (€)<input id="pAmount" type="number" min=".01" step=".01" required></label>
+  <label>Comprador<select id="pBuyer" required></select></label>
+  <div class="actions"><button type="button" class="ghost closeDialog">Cancel·lar</button><button id="savePurchaseBtn" class="primary" value="default">Desar compra</button></div>
+</form></dialog>
+
+<dialog id="memberDialog"><form id="memberForm" method="dialog">
+  <h3>Afegir membre</h3>
+  <label>Nom<input id="mName" required maxlength="40"></label>
+  <label>Data d'alta<input id="mStart" type="date" required></label>
+<label class="checkrow"><input id="mJoinCurrent" type="checkbox"><span>Participa en el cafè de la compra actual</span></label>
+<div id="joinCurrentInfo" class="hintbox" hidden></div>
+  <div class="actions"><button type="button" class="ghost closeDialog">Cancel·lar</button><button class="primary">Afegir</button></div>
+</form></dialog>
+
+
+
+<dialog id="balanceDialog"><form id="balanceForm" method="dialog">
+  <h3>Afegir saldo manualment</h3>
+  <label>Import (€)<input id="balanceAmount" type="number" min="0.01" step="0.01" required></label>
+  <label>Concepte<input id="balanceConcept" maxlength="80" placeholder="Ex. ajust, devolució..." required></label>
+  <label>Data<input id="balanceDate" type="date" required></label>
+  <div class="actions"><button type="button" class="ghost closeBalanceDialog">Cancel·lar</button><button class="primary">Afegir saldo</button></div>
+</form></dialog>
+
+<dialog id="shareDialog">
+  <div class="shareDialogInner">
+    <h3>Compartir resum</h3>
+    <p class="muted">Copia el resum o comparteix-lo directament per WhatsApp.</p>
+    <textarea id="shareText" readonly></textarea>
+    <div class="shareActions">
+      <button type="button" id="whatsappShare" class="primary">WhatsApp</button>
+      <button type="button" id="copyShareText" class="secondary">Copiar text</button>
+      <button type="button" id="closeShareDialog" class="ghost">Tancar</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body></html>
